@@ -1,20 +1,38 @@
-from src.power import power_function
-from src.constants import SAMPLE_CONSTANT
+import typer
+import shlex
+from src.commands import cat, ls, cd
+from pathlib import Path
 
+app = typer.Typer()
+
+@app.command()
+def shell() -> None:
+    register_commands(app)
+    while True:
+        inp = input(f"{Path.cwd()} $ ").strip()
+        if inp == "quit":
+            break
+        try:
+            comm = shlex.split(inp)
+        except ValueError:
+            typer.echo("Invalid command")
+        if not comm:
+            continue
+        #log
+        result = app(comm, standalone_mode=False)
+
+
+def register_commands(app: typer.Typer) -> None:
+    cat.register_cat(app)
+    ls.register_ls(app)
+    cd.register_cd(app)
 
 def main() -> None:
     """
     Обязательнная составляющая программ, которые сдаются. Является точкой входа в приложение
     :return: Данная функция ничего не возвращает
     """
-
-    target, degree = map(int, input("Введите два числа разделенные пробелом: ").split(" "))
-
-    result = power_function(target=target, power=degree)
-
-    print(result)
-
-    print(SAMPLE_CONSTANT)
+    app()
 
 if __name__ == "__main__":
     main()
