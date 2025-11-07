@@ -40,6 +40,6 @@ def check_file_exists(path: str, command: str, lg: bool) -> bool:
         if lg:
             error = f"{command}: {path}: no such file"
             typer.echo(error, err=True)
-            lg.log_err(command, error)
+            log.log_err(command, error)
         return False
     return True

@@ -36,7 +36,7 @@ def register_cp(app: typer.Typer) -> None:
                     log.log_err(cm, "cp: use -r flag to copy a directory")
                     return
                 else:
-                    if path_f.check_file_exists(path_from, cm, 1) and path_f.check_dir_exists(path_to, cm, 1):
+                    if path_f.check_file_exists(path_from, cm, 1):
                         shutil.copy2(path_from, path_to)
                         log.log_success(cm)
                         return

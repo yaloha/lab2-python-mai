@@ -5,24 +5,27 @@ from src import log
 from src.commands import cat, ls, cd, cp, mv, rm
 from pathlib import Path
 
-app = typer.Typer()
-
-def register_commands(app: typer.Typer) -> None:
+def create_app() -> typer.Typer:
     """
     registration of created commands in typer app
     """
+    app = typer.Typer()
     cat.register_cat(app)
     ls.register_ls(app)
     cd.register_cd(app)
     cp.register_cp(app)
     mv.register_mv(app)
     rm.register_rm(app)
+    return app
+
+
+app = create_app()
+
 
 def main() -> None:
     """
     user inputs allowed pseudoshell commands until they enter 'quit'
     """
-    register_commands(app)
     while True:
         inp = input(f"{Path.cwd()} $ ").strip()
         if inp == "quit":

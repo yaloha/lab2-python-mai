@@ -14,9 +14,9 @@ def register_cat(app: typer.Typer) -> None:
         try:
             cm = "cat"
             path = path_f.exp_path(path)
-            if not path_f.check_exists_file(path, cm, 1):
+            if not path_f.check_file_exists(path, cm, 1):
                 return
-            if not path_f.check_permissions(path, cm):
+            if not path_f.check_permission(path, cm):
                 return
             with open(path, 'r') as f:
                 typer.echo(f.read())

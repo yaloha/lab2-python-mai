@@ -29,10 +29,11 @@ def register_rm(app: typer.Typer) -> None:
                 log.log_err(cm, "can't delete this directory")
                 return
             agr = input("are you sure? Y/n\n")
-            if agr:
+            if agr == "Y":
                 if path_f.check_dir_exists(path, cm, 0):
                     if rec:
                         shutil.rmtree(path)
+                        return
                     else:
                         typer.echo(typer.echo("rm: use -r flag to delete a directory", err=True))
                         log.log_err(cm, "rm: use -r flag to delete a directory")
