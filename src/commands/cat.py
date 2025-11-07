@@ -2,18 +2,22 @@ import typer
 from pathlib import Path
 import os
 
+from src import path_f, log
+
+
 def register_cat(app: typer.Typer) -> None:
     @app.command(help="print file contents")
     def cat(path: str = typer.Argument(help="file that you want to open")) -> None:
         try:
-            file_path = Path(path)
-            if not os.path.exists(file_path) or os.path.isdir(file_path):
-                typer.echo(f"cat: {path}: no such file", err=True)
+            cm = "cat"
+            path = path_f.exp_path(path)
+            if not path_f.check_exists_file(path, cm, 1):
                 return
-            if not os.access(file_path, os.R_OK):
-                typer.echo(f"cat: {path}: permission denied", err=True)
+            if not path_f.check_permissions(path, cm):
                 return
-            with open(file_path, 'r') as f:
+            with open(path, 'r') as f:
                 typer.echo(f.read())
+            log.log_success(cm)
         except Exception as e:
+            log.log_err(cm, f"cat: {path} gave an error: {e}")
             typer.echo(f"cat: {path} gave an error: {e}", err=True)

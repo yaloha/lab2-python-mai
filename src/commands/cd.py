@@ -1,6 +1,8 @@
 import typer
 import os
 
+from src import path_f, log
+
 
 def register_cd(app: typer.Typer) -> None:
     @app.command(help="change directory")
@@ -8,13 +10,12 @@ def register_cd(app: typer.Typer) -> None:
         path: str = typer.Argument(".", help="directory path")
     ) -> None:
         try:
-            if path.startswith("~"):
-                path = os.path.expanduser(path)
-
-            if not os.path.exists(path) or not os.path.isdir(path):
-                typer.echo(f"cd: {path}: no such directory", err=True)
+            cm = "cd"
+            path = path_f.exp_path(path)
+            if not path_f.check_dir_exists(path, cd, 1):
                 return
-
             os.chdir(path)
+            log.log_success(cd)
         except Exception as e:
+            log.log_err(cm, f"cd: {path}: {e}")
             typer.echo(f"cd: {path}: {e}", err=True)

@@ -1,6 +1,6 @@
 import typer
 import shlex
-from src.commands import cat, ls, cd
+from src.commands import cat, ls, cd, cp, mv, rm
 from pathlib import Path
 
 app = typer.Typer()
@@ -18,7 +18,6 @@ def shell() -> None:
             typer.echo("Invalid command")
         if not comm:
             continue
-        #log
         result = app(comm, standalone_mode=False)
 
 
@@ -26,6 +25,9 @@ def register_commands(app: typer.Typer) -> None:
     cat.register_cat(app)
     ls.register_ls(app)
     cd.register_cd(app)
+    cp.register_cp(app)
+    mv.register_mv(app)
+    rm.register_rm(app)
 
 def main() -> None:
     """

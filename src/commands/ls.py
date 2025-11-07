@@ -4,6 +4,9 @@ import typer
 from stat import filemode
 import os
 
+from src import path_f, log
+
+
 def register_ls(app: typer.Typer) -> None:
     @app.command(help="print all files in directory")
     def ls(
@@ -11,13 +14,11 @@ def register_ls(app: typer.Typer) -> None:
         details: bool = typer.Option(False, "-l", help="file info")
     ) -> None:
         try:
-            if path.startswith("~"):
-                path = os.path.expanduser(path)
-            if not os.path.exists(path) or not os.path.isdir(path):
-                typer.echo(f"ls: {path}: no such directory", err=True)
+            cm = "ls"
+            path = path_f.exp_path(path)
+            if not path_f.check_dir_exists(path, cm, 1):
                 return
-            if not os.access(path, os.R_OK):
-                typer.echo(f"ls: {path}: permission denied", err=True)
+            if not path_f.check_permission(path, cm):
                 return
             files = os.listdir(path)
             if details:
@@ -30,5 +31,7 @@ def register_ls(app: typer.Typer) -> None:
             else:
                 for file in files:
                     typer.echo(file)
+            log.log_success(cm)
         except Exception as e:
+            log.log_err(cm, f"ls: {path} gave an error: {e}")
             typer.echo(f"ls: {path} gave an error: {e}", err=True)
