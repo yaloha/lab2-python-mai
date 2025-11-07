@@ -8,6 +8,9 @@ from src import path_f, log
 def register_cat(app: typer.Typer) -> None:
     @app.command(help="print file contents")
     def cat(path: str = typer.Argument(help="file that you want to open")) -> None:
+        """
+        cat - output contents of specified file that resides at path you specify
+        """
         try:
             cm = "cat"
             path = path_f.exp_path(path)

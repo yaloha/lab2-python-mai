@@ -9,6 +9,9 @@ def register_cd(app: typer.Typer) -> None:
     def cd(
         path: str = typer.Argument(".", help="directory path")
     ) -> None:
+        """
+        cd - changes current working directory to the specified path
+        """
         try:
             cm = "cd"
             path = path_f.exp_path(path)

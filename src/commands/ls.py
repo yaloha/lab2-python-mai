@@ -8,11 +8,14 @@ from src import path_f, log
 
 
 def register_ls(app: typer.Typer) -> None:
-    @app.command(help="print all files in directory")
+    @app.command(help="display all items in directory")
     def ls(
         path: str = typer.Argument(".", help="directory path"),
         details: bool = typer.Option(False, "-l", help="file info")
     ) -> None:
+        """
+        ls - displays all items in directory, displays additional information if flag -l is used
+        """
         try:
             cm = "ls"
             path = path_f.exp_path(path)

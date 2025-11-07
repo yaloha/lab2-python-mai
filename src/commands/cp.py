@@ -7,12 +7,15 @@ from src import path_f, log
 
 
 def register_cp(app: typer.Typer) -> None:
-    @app.command(help="change directory")
+    @app.command(help="copy file/directory")
     def cp(
         path_from: str = typer.Argument(".", help="path which we're copying from"),
         path_to: str = typer.Argument(".", help="path which we're copying to"),
         rec: bool = typer.Option(False, "-r", help="specifies if copying is recursive")
     ) -> None:
+        """
+        cp - copies file/directory (only if you use flag -r) from path_from to path_to"
+        """
         try:
             cm = "cp"
             path_from = path_f.exp_path(path_from)

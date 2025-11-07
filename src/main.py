@@ -1,12 +1,27 @@
 import typer
 import shlex
+
+from src import log
 from src.commands import cat, ls, cd, cp, mv, rm
 from pathlib import Path
 
 app = typer.Typer()
 
-@app.command()
-def shell() -> None:
+def register_commands(app: typer.Typer) -> None:
+    """
+    registration of created commands in typer app
+    """
+    cat.register_cat(app)
+    ls.register_ls(app)
+    cd.register_cd(app)
+    cp.register_cp(app)
+    mv.register_mv(app)
+    rm.register_rm(app)
+
+def main() -> None:
+    """
+    user inputs allowed pseudoshell commands until they enter 'quit'
+    """
     register_commands(app)
     while True:
         inp = input(f"{Path.cwd()} $ ").strip()
@@ -18,23 +33,12 @@ def shell() -> None:
             typer.echo("Invalid command")
         if not comm:
             continue
-        result = app(comm, standalone_mode=False)
-
-
-def register_commands(app: typer.Typer) -> None:
-    cat.register_cat(app)
-    ls.register_ls(app)
-    cd.register_cd(app)
-    cp.register_cp(app)
-    mv.register_mv(app)
-    rm.register_rm(app)
-
-def main() -> None:
-    """
-    Обязательнная составляющая программ, которые сдаются. Является точкой входа в приложение
-    :return: Данная функция ничего не возвращает
-    """
-    app()
+        log.log_command(inp)
+        try:
+            result = app(comm, standalone_mode=False)
+        except Exception as e:
+            typer.echo(f"{e}")
+            log.log_err("", e)
 
 if __name__ == "__main__":
     main()
