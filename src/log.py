@@ -6,10 +6,16 @@ current_dir = os.path.abspath(__file__)
 temp_dir = os.path.join(current_dir, "..", "temp")
 log_file = os.path.join(temp_dir, "shell.log")
 
+
 def ensure_log_dir() -> None:
-    """Создает директорию для логов если её нет"""
+    """
+    create log directory if it doesn't exist
+    """
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir, exist_ok=True)
+
+
+ensure_log_dir()
 
 
 def log_err(cm: str, err: str) -> None:
