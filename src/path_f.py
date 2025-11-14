@@ -11,6 +11,8 @@ def exp_path(path: str) -> str:
     if path.startswith("~"):
         path = os.path.expanduser(path)
     return path
+
+
 def check_permission(path: str, command: str) -> bool:
     """
     check if file/directory can be accessed
@@ -21,6 +23,8 @@ def check_permission(path: str, command: str) -> bool:
         log.log_err(command, error)
         return False
     return True
+
+
 def check_dir_exists(path: str, command: str, lg: bool) -> bool:
     """
     check if directory exists
@@ -32,6 +36,8 @@ def check_dir_exists(path: str, command: str, lg: bool) -> bool:
             log.log_err(command, error)
         return False
     return True
+
+
 def check_file_exists(path: str, command: str, lg: bool) -> bool:
     """
     check if file exists

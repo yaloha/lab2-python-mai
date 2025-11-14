@@ -2,7 +2,7 @@ import typer
 import shlex
 
 from src import log
-from src.commands import cat, ls, cd, cp, mv, rm
+from src.commands import cat, ls, cd, cp, mv, rm, zip_tar, grep
 from pathlib import Path
 
 def create_app() -> typer.Typer:
@@ -16,6 +16,11 @@ def create_app() -> typer.Typer:
     cp.register_cp(app)
     mv.register_mv(app)
     rm.register_rm(app)
+    zip_tar.register_zip(app)
+    zip_tar.register_tar(app)
+    zip_tar.register_unzip(app)
+    zip_tar.register_untar(app)
+    grep.register_grep(app)
     return app
 
 

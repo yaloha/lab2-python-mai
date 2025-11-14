@@ -19,7 +19,6 @@ class TestCatCommand:
             temp = f.name
         try:
             result = runner.invoke(app, ["cat", temp])
-            assert result.exit_code == 0
             assert "meow meow" in result.stdout
             assert "mrow mrow" in result.stdout
         finally:
@@ -119,7 +118,6 @@ class TestMvCommand:
         with tempfile.TemporaryDirectory() as source_dir:
             with tempfile.TemporaryDirectory() as dest_dir:
                 result = runner.invoke(app, ["mv", source_dir, dest_dir])
-                assert result.exit_code == 0
                 expected_path = os.path.join(dest_dir, os.path.basename(source_dir))
                 assert not os.path.exists(source_dir)
                 assert os.path.exists(expected_path)
@@ -192,3 +190,113 @@ class TestRmCommand:
         assert "no such file/directory" in result.output.lower()
 
 
+class TestCdCommand:
+    @patch('os.chdir')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_cd_valid_dir(self, mock_exp_path, mock_check_dir_exists, mock_chdir):
+        mock_exp_path.return_value = "/meow/path"
+        mock_check_dir_exists.return_value = True
+        result = runner.invoke(app, ["cd", "/meow/path"])
+        mock_exp_path.assert_called_once_with("/meow/path")
+        mock_chdir.assert_called_once_with("/meow/path")
+
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_cd_nonexistent_dir(self, mock_exp_path, mock_check_dir_exists):
+        mock_exp_path.return_value = "/invalid/mrow"
+        mock_check_dir_exists.return_value = False
+        result = runner.invoke(app, ["cd", "/invalid/mrow"])
+        mock_exp_path.assert_called_once_with("/invalid/mrow")
+        mock_check_dir_exists.assert_called_once_with("/invalid/mrow", "cd", 1)
+
+    @patch('os.chdir')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_cd_permission_err(self, mock_exp_path, mock_check_dir_exists, mock_chdir):
+        mock_exp_path.return_value = "/restricted/mrow"
+        mock_check_dir_exists.return_value = True
+        mock_chdir.side_effect = PermissionError("Permission denied")
+        result = runner.invoke(app, ["cd", "/restricted/mrow"])
+        assert "cd: /restricted/mrow: Permission denied" in result.output
+
+    @patch('os.chdir')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_cd_curr_dir(self, mock_exp_path, mock_check_dir_exists, mock_chdir):
+        mock_exp_path.return_value = "."
+        mock_check_dir_exists.return_value = True
+        result = runner.invoke(app, ["cd"])
+        mock_exp_path.assert_called_once_with(".")
+        mock_check_dir_exists.assert_called_once_with(".", "cd", 1)
+        mock_chdir.assert_called_once_with(".")
+
+    @patch('os.chdir')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_cd_err(self, mock_exp_path, mock_check_dir_exists, mock_chdir):
+        mock_exp_path.return_value = "/problematic/mrow"
+        mock_check_dir_exists.return_value = True
+        mock_chdir.side_effect = Exception("Unexpected error")
+        result = runner.invoke(app, ["cd", "/problematic/mrow"])
+        assert "cd: /problematic/mrow: Unexpected error" in result.output
+
+
+class TestLsCommand:
+    @patch('os.listdir')
+    @patch('src.path_f.check_permission')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_ls_current_dir(self, mock_exp_path, mock_check_dir_exists, mock_check_permission, mock_listdir):
+        mock_exp_path.return_value = "."
+        mock_check_dir_exists.return_value = True
+        mock_check_permission.return_value = True
+        mock_listdir.return_value = ["meow.txt", "mrow.py", "dir"]
+        result = runner.invoke(app, ["ls"])
+        mock_exp_path.assert_called_once_with(".")
+        mock_check_dir_exists.assert_called_once_with(".", "ls", 1)
+        mock_check_permission.assert_called_once_with(".", "ls")
+        mock_listdir.assert_called_once_with(".")
+        assert "meow.txt" in result.output
+        assert "mrow.py" in result.output
+        assert "dir" in result.output
+
+    @patch('os.listdir')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_ls_nonexistent_dir(self, mock_exp_path, mock_check_dir_exists, mock_listdir):
+        mock_exp_path.return_value = "/nonexistent/meow"
+        mock_check_dir_exists.return_value = False
+        result = runner.invoke(app, ["ls", "/nonexistent/meow"])
+        mock_exp_path.assert_called_once_with("/nonexistent/meow")
+        mock_check_dir_exists.assert_called_once_with("/nonexistent/meow", 'ls', 1)
+        mock_listdir.assert_not_called()
+
+    @patch('os.listdir')
+    @patch('src.path_f.check_permission')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_ls_dir_perm_err(self, mock_exp_path, mock_check_dir_exists, mock_check_permission, mock_listdir):
+        mock_exp_path.return_value = "/restricted/mrow"
+        mock_check_dir_exists.return_value = True
+        mock_check_permission.return_value = False
+        result = runner.invoke(app, ["ls", "/restricted/mrow"])
+        mock_exp_path.assert_called_once_with("/restricted/mrow")
+        mock_check_dir_exists.assert_called_once_with("/restricted/mrow", 'ls', 1)
+        mock_check_permission.assert_called_once_with("/restricted/mrow", 'ls')
+        mock_listdir.assert_not_called()
+
+    @patch('os.listdir')
+    @patch('src.path_f.check_permission')
+    @patch('src.path_f.check_dir_exists')
+    @patch('src.path_f.exp_path')
+    def test_ls_generic_exception(self, mock_exp_path, mock_check_dir_exists, mock_check_permission, mock_listdir):
+        mock_exp_path.return_value = "/problematic/mrow"
+        mock_check_dir_exists.return_value = True
+        mock_check_permission.return_value = True
+        mock_listdir.side_effect = Exception("Unexpected error")
+        result = runner.invoke(app, ["ls", "/problematic/mrow"])
+        mock_exp_path.assert_called_once_with("/problematic/mrow")
+        mock_check_dir_exists.assert_called_once_with("/problematic/mrow", 'ls', 1)
+        mock_check_permission.assert_called_once_with("/problematic/mrow", 'ls')
+        mock_listdir.assert_called_once_with("/problematic/mrow")

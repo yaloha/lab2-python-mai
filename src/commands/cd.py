@@ -15,7 +15,7 @@ def register_cd(app: typer.Typer) -> None:
         try:
             cm = "cd"
             path = path_f.exp_path(path)
-            if not path_f.check_dir_exists(path, cd, 1):
+            if not path_f.check_dir_exists(path, cm, 1):
                 return
             os.chdir(path)
             log.log_success(cd)
